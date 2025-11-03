@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+instance/
+*.db
+
+# Node
+frontend/node_modules/
+frontend/dist/
+.DS_Store
