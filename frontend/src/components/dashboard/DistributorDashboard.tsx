@@ -1,17 +1,14 @@
-// 🚛 DISTRIBUTOR DASHBOARD
-// Professional dashboard for distributors with logistics focus
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Truck, 
-  Package, 
-  MapPin, 
-  Clock, 
-  Route, 
+import {
+  Truck,
+  Package,
+  MapPin,
+  Clock,
+  Route,
   TrendingUp,
   ArrowRight,
   Navigation,
@@ -57,7 +54,6 @@ export const DistributorDashboard: React.FC = () => {
       description: 'Products handled',
       icon: Package,
       gradient: 'bg-gradient-distributor',
-      change: '+15%'
     },
     {
       title: 'In Transit',
@@ -65,7 +61,6 @@ export const DistributorDashboard: React.FC = () => {
       description: 'Currently shipping',
       icon: Truck,
       gradient: 'bg-gradient-primary',
-      change: '+8%'
     },
     {
       title: 'Delivered',
@@ -73,15 +68,13 @@ export const DistributorDashboard: React.FC = () => {
       description: 'Successfully delivered',
       icon: CheckCircle2,
       gradient: 'bg-gradient-success',
-      change: '+22%'
     },
     {
       title: 'Pending Shipment',
       value: pendingShipment,
       description: 'Ready to ship',
       icon: Clock,
-      gradient: 'bg-gradient-warning',
-      change: '+5%'
+      gradient: 'bg-gradient-admin',
     }
   ];
 
@@ -107,7 +100,7 @@ export const DistributorDashboard: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <motion.div 
+      <motion.div
         className="space-y-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -120,7 +113,6 @@ export const DistributorDashboard: React.FC = () => {
           Distribution Command Center - Manage your supply chain logistics
         </p>
       </motion.div>
-
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsCards.map((stat, index) => (
@@ -145,10 +137,6 @@ export const DistributorDashboard: React.FC = () => {
                     <div className="text-2xl font-bold text-foreground">{stat.value}</div>
                     <p className="text-xs text-muted-foreground">{stat.description}</p>
                   </div>
-                  <Badge variant="secondary" className="text-success border-success/20 bg-success/10">
-                    <TrendingUp className="w-3 h-3 mr-1" />
-                    {stat.change}
-                  </Badge>
                 </div>
               </CardContent>
             </Card>
@@ -157,7 +145,7 @@ export const DistributorDashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
+
         {/* Quick Actions */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -241,38 +229,41 @@ export const DistributorDashboard: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {products.slice(0, 5).map((product, index) => {
-                    const statusConfig = STATUS_CONFIG[product.current_status] || STATUS_CONFIG.Created;
-                    return (
-                      <motion.div
-                        key={product.product_id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="flex items-center justify-between p-3 rounded-lg glass-strong hover:bg-white/5 transition-colors"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-distributor rounded-lg flex items-center justify-center">
-                            <Route className="w-5 h-5 text-white" />
+                  {products
+                    .filter(p => p.custodian === user?.username)
+                    .slice(0, 5)
+                    .map((product, index) => {
+                      const statusConfig = STATUS_CONFIG[product.current_status] || STATUS_CONFIG.Created;
+                      return (
+                        <motion.div
+                          key={product.product_id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="flex items-center justify-between p-3 rounded-lg glass-strong hover:bg-white/5 transition-colors"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-distributor rounded-lg flex items-center justify-center">
+                              <Route className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground">{product.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Custodian: {product.custodian}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium text-foreground">{product.name}</p>
+                          <div className="text-right">
+                            <Badge className={`${statusConfig.bgColor} ${statusConfig.color} ${statusConfig.borderColor} border mb-1`}>
+                              {statusConfig.label}
+                            </Badge>
                             <p className="text-xs text-muted-foreground">
-                              Custodian: {product.custodian}
+                              ID: {product.product_id.slice(0, 8)}...
                             </p>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <Badge className={`${statusConfig.bgColor} ${statusConfig.color} ${statusConfig.borderColor} border mb-1`}>
-                            {statusConfig.label}
-                          </Badge>
-                          <p className="text-xs text-muted-foreground">
-                            ID: {product.product_id.slice(0, 8)}...
-                          </p>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
+                        </motion.div>
+                      );
+                    })}
                 </div>
               )}
             </CardContent>
@@ -286,29 +277,6 @@ export const DistributorDashboard: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6 }}
       >
-        <Card className="glass border-success/20">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-success rounded-lg flex items-center justify-center animate-pulse">
-                  <CheckCircle2 className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-success">Delivery Performance</CardTitle>
-                  <CardDescription>98.5% on-time delivery rate</CardDescription>
-                </div>
-              </div>
-              <div className="text-right">
-                <Badge className="bg-success/10 text-success border-success/20 mb-2">
-                  Excellent Performance
-                </Badge>
-                <p className="text-xs text-muted-foreground">
-                  Average delivery time: 2.3 days
-                </p>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
       </motion.div>
     </div>
   );

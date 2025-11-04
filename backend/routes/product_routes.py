@@ -159,32 +159,51 @@ def get_product(product_id):
 @bp.route("/", methods=["GET"])
 @jwt_required()
 def list_products():
-    page, per_page = int(request.args.get("page", 1)), int(request.args.get("per_page", 10))
+    page = int(request.args.get("page", 1))
+    per_page = int(request.args.get("per_page", 10))
     status = request.args.get("status")
     owner = request.args.get("owner")
     from_date = request.args.get("from")
     to_date = request.args.get("to")
     sort = request.args.get("sort", "created_at:desc")
 
-    query = Product.query
     claims = get_jwt()
-    if claims.get("role") != "super_admin":
-        query = query.filter(or_(Product.custodian == claims.get("username"), Product.owner == claims.get("username")))
-    
-    if status: query = query.filter_by(current_status=status)
-    if owner: query = query.filter_by(owner=owner)
-    if from_date and to_date: query = query.filter(and_(Product.created_at >= from_date, Product.created_at <= to_date))
-    
+    username = claims.get("username")
+    role = claims.get("role")
+    query = Product.query
+
+    if role == "distributor":
+        handled_ids = [h.product_id for h in History.query.filter_by(by_who=username).all()]
+        query = query.filter(
+            or_(
+                Product.custodian == username,
+                Product.product_id.in_(handled_ids)
+            )
+        )
+    elif role != "super_admin":
+        query = query.filter(
+            or_(
+                Product.custodian == username,
+                Product.owner == username
+            )
+        )
+
+    if status:
+        query = query.filter_by(current_status=status)
+    if owner:
+        query = query.filter_by(owner=owner)
     field, direction = sort.split(":") if ":" in sort else (sort, "asc")
     if hasattr(Product, field):
         col = getattr(Product, field)
         query = query.order_by(desc(col) if direction == "desc" else asc(col))
-
     items = query.paginate(page=page, per_page=per_page, error_out=False)
     return jsonify({
-        "page": page, "per_page": per_page, "total": items.total,
+        "page": page,
+        "per_page": per_page,
+        "total": items.total,
         "products": [p.to_dict() for p in items.items]
     }), 200
+
 
 @bp.route("/search", methods=["GET"])
 @jwt_required()
@@ -348,48 +367,50 @@ def get_product_history_from_blockchain(product_id):
 def get_available_products():
     """
     Return products the current user can order, based on bottom-up hierarchy:
-    - Retailer → can order from distributors (products where owner & custodian are distributors)
-    - Distributor → can order from manufacturers (products where owner & custodian are manufacturers)
-    - Manufacturer → can see own currently held products
+    - Retailer → can order from distributors (products custodian == distributor)
+    - Distributor → can order from manufacturers (products custodian == manufacturer)
+    - Manufacturer → can see their own products
+    Optional query: ?supplier_username=<username> to filter by specific user.
     """
     claims = get_jwt()
     username = claims.get("username")
     role = claims.get("role")
 
-    # Determine visible products depending on role
+    supplier_username = request.args.get("supplier_username")  # Optional dropdown selection
+
     if role == "retailer":
-        # Get all distributors
-        distributor_usernames = [u.username for u in User.query.filter_by(role="distributor").all()]
-        if not distributor_usernames:
+        distributors = [u.username for u in User.query.filter_by(role="distributor").all()]
+        manufacturers = [u.username for u in User.query.filter_by(role="manufacturer").all()]
+        if not distributors or not manufacturers:
             return jsonify([]), 200
-        
-        manufacturer_usernames = [u.username for u in User.query.filter_by(role="manufacturer").all()]
-        if not manufacturer_usernames:
-            return jsonify([]), 200
-        
-        products = Product.query.filter(
-            Product.owner.in_(manufacturer_usernames),
-            Product.custodian.in_(distributor_usernames)
-        ).all()
+
+        query = Product.query.filter(
+            Product.owner.in_(manufacturers),
+            Product.custodian.in_(distributors)
+        )
+        if supplier_username:
+            query = query.filter(Product.custodian == supplier_username)
 
     elif role == "distributor":
-        # Get all manufacturers
-        manufacturer_usernames = [u.username for u in User.query.filter_by(role="manufacturer").all()]
-        if not manufacturer_usernames:
+        manufacturers = [u.username for u in User.query.filter_by(role="manufacturer").all()]
+        if not manufacturers:
             return jsonify([]), 200
-        products = Product.query.filter(
-            Product.owner.in_(manufacturer_usernames),
-            Product.custodian.in_(manufacturer_usernames)
-        ).all()
+
+        query = Product.query.filter(
+            Product.owner.in_(manufacturers),
+            Product.custodian.in_(manufacturers)
+        )
+        if supplier_username:
+            query = query.filter(Product.custodian == supplier_username)
 
     elif role == "manufacturer":
-        products = Product.query.filter_by(owner=username, custodian=username).all()
+        query = Product.query.filter_by(owner=username, custodian=username)
 
     else:
-        # For admin roles etc.
-        products = Product.query.limit(100).all()
+        query = Product.query.limit(100)
 
-    # Return only light details
+    products = query.all()
+
     result = [{
         "product_id": p.product_id,
         "name": p.name,
@@ -397,5 +418,4 @@ def get_available_products():
         "owner": p.owner,
         "custodian": p.custodian
     } for p in products]
-
     return jsonify(result), 200

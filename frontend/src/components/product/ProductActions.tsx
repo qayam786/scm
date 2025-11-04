@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -20,6 +21,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
   onUpdate 
 }) => {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedStatus, setSelectedStatus] = useState<ProductStatus | ''>('');
   const [transferToUser, setTransferToUser] = useState<string>('');
   const [availableUsers, setAvailableUsers] = useState<{username: string}[]>([]);
@@ -35,6 +37,26 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
     'ReadyForShipping': 'distributor',
     'DeliveredToRetailer': 'retailer'
   };
+
+  useEffect(() => {
+    // Check for pre-filled recipient from URL params (from order acceptance)
+    const transferToParam = searchParams.get('transferTo');
+    if (transferToParam) {
+      setTransferToUser(transferToParam);
+      // Auto-select the appropriate status based on role
+      if (user?.role === 'distributor') {
+        setSelectedStatus('DeliveredToRetailer');
+      } else if (user?.role === 'manufacturer') {
+        setSelectedStatus('ReadyForShipping');
+      }
+      // Clear the param after using it
+      searchParams.delete('transferTo');
+      setSearchParams(searchParams, { replace: true });
+      toast.info('Transfer recipient pre-filled from order', {
+        description: `Ready to transfer to ${transferToParam}`
+      });
+    }
+  }, [searchParams, user]);
 
   useEffect(() => {
     if (selectedStatus && selectedStatus in transferStatuses) {

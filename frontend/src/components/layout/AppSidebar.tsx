@@ -33,7 +33,10 @@ import {
   BarChart3,
   TrendingUp,
   MapPin,
-  ShoppingCart
+  ShoppingCart,
+  ClipboardList,
+  ShoppingBag,
+  Inbox
 } from 'lucide-react';
 import { UserRole } from '@/types';
 import { ROLE_CONFIG } from '@/utils/constants';
@@ -46,18 +49,21 @@ const navigationItems = {
     { title: 'Dashboard', url: '/dashboard', icon: BarChart3 },
     { title: 'My Products', url: '/products', icon: Package },
     { title: 'Create Product', url: '/products/create', icon: Plus },
-   // { title: 'Blockchain', url: '/blockchain', icon: Shield },
+    { title: 'Incoming Orders', url: '/orders/incoming', icon: Inbox },
+    { title: 'All Orders', url: '/orders', icon: ClipboardList },
   ],
   distributor: [
     { title: 'Dashboard', url: '/dashboard', icon: BarChart3 },
     { title: 'My Products', url: '/products', icon: Package },
-    { title: 'Supply Chain', url: '/blockchain', icon: Truck },
-    { title: 'Locations', url: '/locations', icon: MapPin },
+    { title: 'Order Products', url: '/orders/request', icon: ShoppingBag },
+    { title: 'Incoming Orders', url: '/orders/incoming', icon: Inbox },
+    { title: 'All Orders', url: '/orders', icon: ClipboardList },
   ],
   retailer: [
     { title: 'Dashboard', url: '/dashboard', icon: BarChart3 },
     { title: 'My Products', url: '/products', icon: Package },
-    { title: 'Store Management', url: '/store', icon: Store },
+    { title: 'Order Products', url: '/orders/request', icon: ShoppingBag },
+    { title: 'All Orders', url: '/orders', icon: ClipboardList },
     { title: 'Sales Tracking', url: '/sales', icon: ShoppingCart },
   ],
   super_admin: [

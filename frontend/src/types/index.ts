@@ -1,6 +1,3 @@
-// 🎯 BLOCKCHAIN SUPPLY CHAIN TYPES
-// Professional type definitions for our supply chain system
-
 export type UserRole = 'manufacturer' | 'distributor' | 'retailer' | 'super_admin';
 
 export type ProductStatus = 
@@ -83,7 +80,7 @@ export interface UpdateProductRequest {
   longitude?: number;
 }
 
-// 🎨 UI Helper Types
+//  UI Helper Types
 export interface StatusConfig {
   label: string;
   color: string;
@@ -96,4 +93,30 @@ export interface RoleConfig {
   color: string;
   gradient: string;
   allowedStatuses: ProductStatus[];
+}
+
+//  Order Types
+export type OrderStatus = 'Pending' | 'Accepted' | 'Rejected' | 'Fulfilled';
+
+export interface Order {
+  order_id: string;
+  product_id: string;
+  from_user: string;
+  to_user: string;
+  status: OrderStatus;
+  message?: string;
+  note?: string;
+  created_at?: number;
+  updated_at?: number;
+}
+
+export interface CreateOrderRequest {
+  product_id: string;
+  to_username?: string;
+  message: string;
+}
+
+export interface UpdateOrderStatusRequest {
+  status: OrderStatus;
+  note?: string;
 }

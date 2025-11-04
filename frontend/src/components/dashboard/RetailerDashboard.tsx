@@ -1,15 +1,12 @@
-// 🏪 RETAILER DASHBOARD
-// Professional dashboard for retailers with sales focus
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Store, 
-  Package, 
-  DollarSign, 
+import {
+  Store,
+  Package,
+  DollarSign,
   TrendingUp,
   ShoppingCart,
   BarChart3,
@@ -58,7 +55,6 @@ export const RetailerDashboard: React.FC = () => {
       description: 'Products received',
       icon: Package,
       gradient: 'bg-gradient-retailer',
-      change: '+18%'
     },
     {
       title: 'Available for Sale',
@@ -66,7 +62,6 @@ export const RetailerDashboard: React.FC = () => {
       description: 'Ready to sell',
       icon: Store,
       gradient: 'bg-gradient-success',
-      change: '+12%'
     },
     {
       title: 'Products Sold',
@@ -74,7 +69,6 @@ export const RetailerDashboard: React.FC = () => {
       description: 'Successfully sold',
       icon: DollarSign,
       gradient: 'bg-gradient-primary',
-      change: '+25%'
     },
     {
       title: 'New Deliveries',
@@ -82,7 +76,6 @@ export const RetailerDashboard: React.FC = () => {
       description: 'Just arrived',
       icon: CheckCircle2,
       gradient: 'bg-gradient-distributor',
-      change: '+8%'
     }
   ];
 
@@ -108,7 +101,7 @@ export const RetailerDashboard: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <motion.div 
+      <motion.div
         className="space-y-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -146,10 +139,6 @@ export const RetailerDashboard: React.FC = () => {
                     <div className="text-2xl font-bold text-foreground">{stat.value}</div>
                     <p className="text-xs text-muted-foreground">{stat.description}</p>
                   </div>
-                  <Badge variant="secondary" className="text-success border-success/20 bg-success/10">
-                    <TrendingUp className="w-3 h-3 mr-1" />
-                    {stat.change}
-                  </Badge>
                 </div>
               </CardContent>
             </Card>
@@ -158,7 +147,7 @@ export const RetailerDashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
+
         {/* Quick Actions */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -280,36 +269,12 @@ export const RetailerDashboard: React.FC = () => {
           </Card>
         </motion.div>
       </div>
-
       {/* Sales Performance */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6 }}
       >
-        <Card className="glass border-success/20">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-success rounded-lg flex items-center justify-center animate-pulse">
-                  <Star className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-success">Sales Performance</CardTitle>
-                  <CardDescription>92% customer satisfaction rate</CardDescription>
-                </div>
-              </div>
-              <div className="text-right">
-                <Badge className="bg-success/10 text-success border-success/20 mb-2">
-                  Outstanding Performance
-                </Badge>
-                <p className="text-xs text-muted-foreground">
-                  Monthly revenue growth: +25%
-                </p>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
       </motion.div>
     </div>
   );

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { productService, blockchainService, getApiBaseUrl } from '@/services/api';
+import { productService, blockchainService } from '@/services/api';
 import { Product, ProductHistory, BlockchainBlock } from '@/types';
 import { STATUS_CONFIG } from '@/utils/constants';
 import { ProductTrackingMap } from '../map/ProductTrackingMap';
@@ -23,13 +23,21 @@ export const ProductDetailPage: React.FC = () => {
   const [blockchainBlocks, setBlockchainBlocks] = useState<BlockchainBlock[]>([]);
   const [loading, setLoading] = useState(true);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
-  
+  const [activeTab, setActiveTab] = useState('journey');
 
   useEffect(() => {
     if (productId) {
       loadProductData();
     }
   }, [productId]);
+
+  useEffect(() => {
+    // Check if URL has a hash to open specific tab
+    const hash = window.location.hash.replace('#', '');
+    if (hash && ['journey', 'timeline', 'blockchain', 'actions'].includes(hash)) {
+      setActiveTab(hash);
+    }
+  }, []);
 
   const loadProductData = async () => {
     if (!productId) return;
@@ -47,7 +55,7 @@ export const ProductDetailPage: React.FC = () => {
       setProduct(productData);
       setProductHistory(historyData);
       setBlockchainBlocks(blockchainData);
-      setQrCodeUrl(`${getApiBaseUrl()}/api/products/${productId}/qrcode`);
+      setQrCodeUrl(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'}/api/products/${productId}/qrcode`);
       
     } catch (error) {
       console.error('Failed to load product data:', error);
@@ -225,7 +233,7 @@ export const ProductDetailPage: React.FC = () => {
         </Card>
 
         {/* Tabbed Content */}
-        <Tabs defaultValue="journey" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="journey" className="flex items-center">
               <Eye className="h-4 w-4 mr-2" />

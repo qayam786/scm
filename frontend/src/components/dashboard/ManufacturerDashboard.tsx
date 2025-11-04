@@ -1,6 +1,3 @@
-// 🏭 MANUFACTURER DASHBOARD
-// Beautiful dashboard for manufacturers with production metrics
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -56,7 +53,6 @@ export const ManufacturerDashboard: React.FC = () => {
       description: 'Products manufactured',
       icon: Package,
       gradient: 'bg-gradient-primary',
-      change: '+12%'
     },
     {
       title: 'Active in Chain',
@@ -64,7 +60,6 @@ export const ManufacturerDashboard: React.FC = () => {
       description: 'Currently in supply chain',
       icon: Zap,
       gradient: 'bg-gradient-success',
-      change: '+5%'
     },
     {
       title: 'Ready to Ship',
@@ -72,7 +67,6 @@ export const ManufacturerDashboard: React.FC = () => {
       description: 'Awaiting shipment',
       icon: CheckCircle2,
       gradient: 'bg-gradient-distributor',
-      change: '+8%'
     },
     {
       title: 'In Production',
@@ -80,7 +74,6 @@ export const ManufacturerDashboard: React.FC = () => {
       description: 'Being manufactured',
       icon: Factory,
       gradient: 'bg-gradient-manufacturer',
-      change: '+3%'
     }
   ];
 
@@ -136,10 +129,6 @@ export const ManufacturerDashboard: React.FC = () => {
                     <div className="text-2xl font-bold text-foreground">{stat.value}</div>
                     <p className="text-xs text-muted-foreground">{stat.description}</p>
                   </div>
-                  <Badge variant="secondary" className="text-success border-success/20 bg-success/10">
-                    <TrendingUp className="w-3 h-3 mr-1" />
-                    {stat.change}
-                  </Badge>
                 </div>
               </CardContent>
             </Card>

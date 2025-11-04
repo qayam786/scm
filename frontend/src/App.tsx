@@ -17,6 +17,9 @@ import Blockchain from "./pages/Blockchain";
 import PublicVerify from "./pages/PublicVerify";
 import VerifyRedirect from "./pages/VerifyRedirect";
 import NotFound from "./pages/NotFound";
+import OrderProducts from "./pages/OrderProducts";
+import IncomingOrders from "./pages/IncomingOrders";
+import OrdersList from "./pages/OrdersList";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +77,31 @@ const App = () => (
             <Route path="/product/:productId" element={
               <ProtectedRoute>
                 <ProductDetailPage />
+              </ProtectedRoute>
+            } />
+
+            {/* Order Routes */}
+            <Route path="/orders/request" element={
+              <ProtectedRoute allowedRoles={['retailer', 'distributor']}>
+                <DashboardLayout>
+                  <OrderProducts />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+
+            <Route path="/orders/incoming" element={
+              <ProtectedRoute allowedRoles={['distributor', 'manufacturer']}>
+                <DashboardLayout>
+                  <IncomingOrders />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+
+            <Route path="/orders" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <OrdersList />
+                </DashboardLayout>
               </ProtectedRoute>
             } />
             

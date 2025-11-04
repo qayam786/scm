@@ -77,16 +77,16 @@ def create_order():
     block_info = None
     try:
         bc = current_app.config.get("BLOCKCHAIN")
-        if bc:
-            block = bc.add_block({
-                "type": "order_created",
-                "order_id": order.order_id,
-                "product_id": product_id,
-                "from": actor,
-                "to": final_to,
-                "message": message
-            })
-            block_info = block.to_dict()
+        # if bc:
+        #     block = bc.add_block({
+        #         "type": "order_created",
+        #         "order_id": order.order_id,
+        #         "product_id": product_id,
+        #         "from": actor,
+        #         "to": final_to,
+        #         "message": message
+        #     })
+        #     block_info = block.to_dict()
     except Exception as e:
         current_app.logger.error(f"BLOCKCHAIN_ORDER_CREATE_FAIL: {e}")
         block_info = None
@@ -175,15 +175,15 @@ def update_order_status(order_id):
     block_info = None
     try:
         bc = current_app.config.get("BLOCKCHAIN")
-        if bc:
-            block = bc.add_block({
-                "type": "order_status_updated",
-                "order_id": order.order_id,
-                "new_status": new_status,
-                "updated_by": actor,
-                "note": note
-            })
-            block_info = block.to_dict()
+        # if bc:
+        #     block = bc.add_block({
+        #         "type": "order_status_updated",
+        #         "order_id": order.order_id,
+        #         "new_status": new_status,
+        #         "updated_by": actor,
+        #         "note": note
+        #     })
+        #     block_info = block.to_dict()
     except Exception as e:
         current_app.logger.error(f"BLOCKCHAIN_ORDER_UPDATE_FAIL: {e}")
 

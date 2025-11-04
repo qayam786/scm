@@ -1,6 +1,3 @@
-// 🌐 BLOCKCHAIN SUPPLY CHAIN API SERVICE
-// Professional API service with full error handling and type safety
-
 import axios, { AxiosResponse } from 'axios';
 import { 
   User, 
@@ -13,11 +10,10 @@ import {
   UserRole
 } from '@/types';
 
-// 🔧 API Configuration
+
 const DEFAULT_API_BASE_URL = 'http://127.0.0.1:5000';
 
-export function getApiBaseUrl() {
-  // 1) URL query param takes top priority (and persists)
+function resolveApiBaseUrl() {
   try {
     const url = new URL(window.location.href);
     const fromParam = url.searchParams.get('api_base_url');
@@ -26,31 +22,17 @@ export function getApiBaseUrl() {
       return fromParam;
     }
   } catch {}
-
-  // 2) Explicit global override on window (useful when embedding)
-  try {
-    const fromWindow = (window as any)?.__API_BASE_URL as string | undefined;
-    if (fromWindow) return fromWindow;
-  } catch {}
-
-  // 3) Vite env var (build-time)
-  try {
-    const fromEnv = (import.meta as any)?.env?.VITE_API_BASE_URL as string | undefined;
-    if (fromEnv) return fromEnv;
-  } catch {}
-
-  // 4) Persisted choice or default
   return localStorage.getItem('api_base_url') || DEFAULT_API_BASE_URL;
 }
 
 const api = axios.create({
-  baseURL: getApiBaseUrl(),
+  baseURL: resolveApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// 🔐 Request Interceptor - Add JWT token to requests
+//  Request Interceptor - Add JWT token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
   if (token) {
@@ -59,7 +41,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 🚨 Response Interceptor - Handle errors gracefully
+//  Response Interceptor - Handle errors gracefully
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -73,9 +55,8 @@ api.interceptors.response.use(
   }
 );
 
-// 🔥 API SERVICES
-
-// 🔐 Authentication Services
+// API SERVICES
+// Authentication Services
 export const authService = {
   async login(username: string, password: string): Promise<AuthResponse> {
     const { data } = await api.post<AuthResponse>('/api/auth/login', { username, password });
@@ -111,7 +92,7 @@ export const authService = {
   }
 };
 
-// 👥 User Services
+//  User Services
 export const userService = {
   async getUsersByRole(role: UserRole): Promise<{ username: string }[]> {
     const { data } = await api.get(`/api/users/list_by_role?role=${role}`);
@@ -119,7 +100,7 @@ export const userService = {
   }
 };
 
-// 📦 Product Services  
+//  Product Services  
 export const productService = {
   async createProduct(productData: CreateProductRequest): Promise<any> {
     const { data } = await api.post('/api/products/', productData);
@@ -137,15 +118,34 @@ export const productService = {
   },
 
   async getProducts(params?: {
-    page?: number;
-    per_page?: number;
-    status?: string;
-    owner?: string;
-    sort?: string;
-  }): Promise<{ page: number; per_page: number; total: number; products: Product[] }> {
-    const { data } = await api.get('/api/products/', { params });
-    return data;
-  },
+      page?: number;
+      per_page?: number;
+      status?: string;
+      owner?: string;
+      custodian?: string; // frontend param; backend may expect current_custodian
+      sort?: string;
+    }): Promise<{ page: number; per_page: number; total: number; products: Product[] }> {
+      // Normalize params for backend compatibility
+      const normalizedParams: any = { ...(params || {}) };
+      if (normalizedParams.custodian && !normalizedParams.current_custodian) {
+        normalizedParams.current_custodian = normalizedParams.custodian;
+        delete normalizedParams.custodian;
+      }
+
+      // Prefer no trailing slash and handle different possible response shapes
+      const { data } = await api.get('/api/products/', { params: normalizedParams });
+
+      if (Array.isArray(data)) {
+        return { page: 1, per_page: data.length, total: data.length, products: data };
+      }
+      if (data && Array.isArray(data.products)) {
+        return data;
+      }
+      if (data && Array.isArray(data.items)) {
+        return { page: data.page ?? 1, per_page: data.per_page ?? data.items.length, total: data.total ?? data.items.length, products: data.items };
+      }
+      return { page: 1, per_page: 0, total: 0, products: [] };
+    },
 
   async searchProducts(query: string): Promise<Product[]> {
     const { data } = await api.get(`/api/products/search?query=${encodeURIComponent(query)}`);
@@ -177,7 +177,7 @@ export const productService = {
   }
 };
 
-// ⛓️ Blockchain Services
+// Blockchain Services
 export const blockchainService = {
   async getFullChain(): Promise<{ chain: BlockchainBlock[]; valid: boolean; message: string }> {
     const { data } = await api.get('/api/chain/');
@@ -205,7 +205,7 @@ export const blockchainService = {
   }
 };
 
-// 🌍 Geolocation Service
+//  Geolocation Service
 export const locationService = {
   async getCurrentLocation(): Promise<{ latitude: number; longitude: number }> {
     return new Promise((resolve, reject) => {
@@ -233,5 +233,65 @@ export const locationService = {
     });
   }
 };
+
+// Public Verification Service (No Auth Required)
+export const publicVerifyService = {
+  async verifyProduct(productId: string): Promise<ProductHistory> {
+    const publicApi = axios.create({
+      baseURL: resolveApiBaseUrl(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const { data } = await publicApi.get<ProductHistory>(`/api/public/verify/${productId}`);
+    return data;
+  }
+};
+
+//  Order Services
+export const orderService = {
+  // Fetch available products (supports optional supplier filter)
+  async getAvailableProducts(params?: { supplier_username?: string }): Promise<Product[]> {
+    const query = params?.supplier_username
+      ? `?supplier_username=${encodeURIComponent(params.supplier_username)}`
+      : '';
+    const { data } = await api.get(`/api/products/available${query}`);
+    return data;
+  },
+
+  // Create a new order
+  async createOrder(orderData: {
+    product_id: string;
+    to_username?: string;
+    message: string;
+  }): Promise<any> {
+    const { data } = await api.post('/api/orders/create', orderData);
+    return data;
+  },
+
+  // Update order status
+  async updateOrderStatus(
+    orderId: string,
+    status: string,
+    note?: string
+  ): Promise<any> {
+    const { data } = await api.post(`/api/orders/${orderId}/update_status`, {
+      status,
+      note,
+    });
+    return data;
+  },
+
+  //  Fetch current user's orders
+  async getMyOrders(params?: {
+    role_filter?: 'sent' | 'received';
+    status?: string;
+  }): Promise<any[]> {
+    const { data } = await api.get('/api/orders/my_orders', { params });
+    return data;
+  },
+};
+
+
 
 export default api;
