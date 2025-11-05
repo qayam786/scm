@@ -118,7 +118,13 @@ def my_orders():
         q = q.filter_by(status=status)
 
     orders = q.order_by(Order.created_at.desc()).all()
-    return jsonify([o.to_dict() for o in orders]), 200
+    order_list = []
+    for o in orders:
+        order_data = o.to_dict()
+        product = Product.query.filter_by(product_id=o.product_id).first()
+        order_data["product_name"] = product.name if product else "Unknown Product"
+        order_list.append(order_data)
+    return jsonify(order_list), 200
 
 
 @bp.route("/<order_id>", methods=["GET"])

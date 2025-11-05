@@ -13,7 +13,6 @@ const STATUS_COLORS = {
   Pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
   Accepted: 'bg-green-500/10 text-green-500 border-green-500/20',
   Rejected: 'bg-red-500/10 text-red-500 border-red-500/20',
-  Fulfilled: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
 };
 
 export default function OrdersList() {
@@ -38,13 +37,18 @@ export default function OrdersList() {
   });
 
   // Fetch product info once to map IDs to names
-  const { data: products } = useQuery({
+  const { data: productsData } = useQuery({
     queryKey: ['products-for-orders'],
     queryFn: () => productService.getProducts({}),
   });
 
+  console.log('Products data for order lookup:', productsData);
+
   const getProductName = (productId: string) => {
-    const product = products?.products?.find((p: any) => p.product_id === productId);
+    const allProducts = productsData?.products ?? [];
+    const product = allProducts.find(
+      (p: any) => p.product_id?.toLowerCase() === productId?.toLowerCase()
+    );
     return product?.name || 'Unknown Product';
   };
 
@@ -65,7 +69,7 @@ export default function OrdersList() {
                 ) : (
                   <ArrowDownLeft className="h-4 w-4 text-green-500" />
                 )}
-                {getProductName(order.product_id)}
+                {order.product_name || 'Unknown Product'}
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
                 {isSent ? `To: ${order.to_user}` : `From: ${order.from_user}`}
@@ -127,7 +131,6 @@ export default function OrdersList() {
               <SelectItem value="Pending">Pending</SelectItem>
               <SelectItem value="Accepted">Accepted</SelectItem>
               <SelectItem value="Rejected">Rejected</SelectItem>
-              <SelectItem value="Fulfilled">Fulfilled</SelectItem>
             </SelectContent>
           </Select>
         </div>

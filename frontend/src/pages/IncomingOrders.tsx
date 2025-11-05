@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Package, CheckCircle, XCircle, User, MessageSquare, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { orderService, productService } from '@/services/api';
+import { orderService } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,11 +27,6 @@ export default function IncomingOrders() {
     queryFn: () => orderService.getMyOrders({ role_filter: 'received', status: 'Pending' }),
   });
 
-  const { data: products } = useQuery({
-    queryKey: ['products-for-orders'],
-    queryFn: () => productService.getProducts({}),
-  });
-
   const updateOrderMutation = useMutation({
     mutationFn: ({ orderId, status, note }: { orderId: string; status: string; note?: string }) =>
       orderService.updateOrderStatus(orderId, status, note),
@@ -44,7 +39,7 @@ export default function IncomingOrders() {
 
       // If accepted, redirect to product detail page (actions tab) with pre-filled recipient
       if (variables.status === 'Accepted' && selectedOrder) {
-        const product = products?.products?.find((p: any) => p.product_id === selectedOrder.product_id);
+        const product = selectedOrder?.product_name ? { name: selectedOrder.product_name, product_id: selectedOrder.product_id } : null;
         if (product) {
           const recipientRole = user?.role === 'distributor' ? 'retailer' : 'distributor';
           toast.success(`Redirecting to transfer product to ${recipientRole}...`, {
@@ -76,11 +71,6 @@ export default function IncomingOrders() {
       status: actionType === 'accept' ? 'Accepted' : 'Rejected',
       note: note.trim() || undefined,
     });
-  };
-
-  const getProductName = (productId: string) => {
-    const product = products?.products?.find((p: any) => p.product_id === productId);
-    return product?.name || productId;
   };
 
   if (isLoading) {
@@ -128,7 +118,7 @@ export default function IncomingOrders() {
                     <div className="flex-1">
                       <CardTitle className="flex items-center gap-2">
                         <Package className="h-5 w-5" />
-                        {getProductName(order.product_id)}
+                        {order.product_name || order.product_id}
                       </CardTitle>
                       <CardDescription className="mt-2">
                         Order ID: {order.order_id}
@@ -210,7 +200,7 @@ export default function IncomingOrders() {
               <div className="space-y-2">
                 <Label>Order Details</Label>
                 <div className="p-3 bg-muted rounded-md space-y-2">
-                  <p className="text-sm"><span className="font-medium">Product:</span> {getProductName(selectedOrder.product_id)}</p>
+                  <p className="text-sm"><span className="font-medium">Product:</span> {selectedOrder.product_name || selectedOrder.product_id}</p>
                   <p className="text-sm"><span className="font-medium">From:</span> {selectedOrder.from_user}</p>
                   {selectedOrder.message && (
                     <p className="text-sm"><span className="font-medium">Message:</span> {selectedOrder.message}</p>

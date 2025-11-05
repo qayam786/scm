@@ -1,6 +1,3 @@
-// 📦 PRODUCT LIST PAGE
-// Comprehensive product management interface
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,11 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Package, 
-  Search, 
-  Plus, 
-  Eye, 
+import {
+  Package,
+  Search,
+  Plus,
+  Eye,
   QrCode,
   ArrowLeft,
   Trash2,
@@ -38,7 +35,7 @@ import { productService } from '@/services/api';
 import { Product } from '@/types';
 import { STATUS_CONFIG } from '@/utils/constants';
 import { toast } from '@/hooks/use-toast';
- 
+
 
 const ProductList: React.FC = () => {
   const navigate = useNavigate();
@@ -48,7 +45,7 @@ const ProductList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  
+
 
   const loadProducts = async (page = 1, search = '') => {
     setIsLoading(true);
@@ -78,7 +75,7 @@ const ProductList: React.FC = () => {
       });
     } finally {
       setIsLoading(false);
-      
+
     }
   };
 
@@ -107,7 +104,7 @@ const ProductList: React.FC = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       toast({
         title: "QR Code Downloaded",
         description: `QR code for ${product.name} downloaded successfully`,
@@ -124,7 +121,7 @@ const ProductList: React.FC = () => {
 
   const handleDeleteProduct = async (product: Product) => {
     if (!window.confirm(`Are you sure you want to delete "${product.name}"?`)) return;
-    
+
     try {
       await productService.deleteProduct(product.product_id);
       toast({
@@ -146,16 +143,16 @@ const ProductList: React.FC = () => {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="flex items-center justify-between"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate('/dashboard')}
               className="text-muted-foreground hover:text-foreground"
             >
@@ -163,9 +160,9 @@ const ProductList: React.FC = () => {
               Back to Dashboard
             </Button>
           </div>
-          
+
           {user?.role === 'manufacturer' && (
-            <Button 
+            <Button
               onClick={() => navigate('/products/create')}
               className="bg-gradient-manufacturer"
             >
@@ -184,8 +181,8 @@ const ProductList: React.FC = () => {
             Product Management
           </h1>
           <p className="text-xl text-muted-foreground">
-            {user?.role === 'super_admin' 
-              ? 'Manage all products in the supply chain' 
+            {user?.role === 'super_admin'
+              ? 'Manage all products in the supply chain'
               : 'Track and manage your products'
             }
           </p>
@@ -212,8 +209,8 @@ const ProductList: React.FC = () => {
                   <Search className="w-4 h-4 mr-2" />
                   Search
                 </Button>
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   variant="outline"
                   onClick={() => {
                     setSearchQuery('');
@@ -223,7 +220,7 @@ const ProductList: React.FC = () => {
                 >
                   Clear
                 </Button>
-                
+
               </form>
             </CardContent>
           </Card>
@@ -261,13 +258,13 @@ const ProductList: React.FC = () => {
                     {searchQuery ? 'No products found' : 'No products yet'}
                   </h3>
                   <p className="text-muted-foreground mb-4">
-                    {searchQuery 
+                    {searchQuery
                       ? 'Try adjusting your search criteria'
                       : 'Create your first product to get started'
                     }
                   </p>
                   {user?.role === 'manufacturer' && !searchQuery && (
-                    <Button 
+                    <Button
                       onClick={() => navigate('/products/create')}
                       className="bg-gradient-manufacturer"
                     >
@@ -347,7 +344,7 @@ const ProductList: React.FC = () => {
                                     Download QR
                                   </DropdownMenuItem>
                                   {user?.role === 'super_admin' && (
-                                    <DropdownMenuItem 
+                                    <DropdownMenuItem
                                       onClick={() => handleDeleteProduct(product)}
                                       className="text-destructive focus:text-destructive"
                                     >
@@ -373,16 +370,16 @@ const ProductList: React.FC = () => {
                     Page {currentPage} of {totalPages}
                   </div>
                   <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       disabled={currentPage <= 1}
                       onClick={() => setCurrentPage(currentPage - 1)}
                     >
                       Previous
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage(currentPage + 1)}

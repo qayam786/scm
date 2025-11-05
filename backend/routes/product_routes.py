@@ -419,3 +419,72 @@ def get_available_products():
         "custodian": p.custodian
     } for p in products]
     return jsonify(result), 200
+
+
+@bp.route("/sales_stats", methods=["GET"])
+@jwt_required()
+def get_sales_stats():
+    """
+    Returns retailer sales statistics grouped dynamically:
+    - range=day   → hourly sales today
+    - range=week  → daily sales for the last 7 days
+    - range=month → weekly sales within this month
+    """
+    from collections import defaultdict
+    import datetime
+    import math
+
+    claims = get_jwt()
+    username = claims.get("username")
+    role = claims.get("role")
+
+    if role != "retailer":
+        return jsonify({"error": "Only retailers can view sales tracking"}), 403
+
+    range_type = request.args.get("range", "week").lower()
+    now = datetime.datetime.now()
+    today = now.date()
+
+    # fetch all sold products for this retailer
+    products = Product.query.filter_by(custodian=username, current_status="Sold").all()
+    if not products:
+        return jsonify([]), 200
+
+    stats = defaultdict(int)
+
+    for p in products:
+        dt = datetime.datetime.fromtimestamp(p.created_at)
+        sale_date = dt.date()
+
+        if range_type == "day":
+            # Group sales for today by hour
+            if sale_date == today:
+                hour_label = dt.strftime("%H:00")
+                stats[hour_label] += 1
+
+        elif range_type == "week":
+            # Group sales for last 7 days by day
+            if sale_date >= today - datetime.timedelta(days=6):
+                day_label = sale_date.strftime("%a")  # Mon, Tue, etc.
+                stats[day_label] += 1
+
+        elif range_type == "month":
+            # Group this month's sales into 4 weeks
+            if sale_date.month == today.month and sale_date.year == today.year:
+                day_of_month = sale_date.day
+                week_num = math.ceil(day_of_month / 7)
+                week_label = f"Week {week_num}"
+                stats[week_label] += 1
+
+    # Convert to sorted list
+    # For day: sort hours; for week: sort days Mon→Sun; for month: sort weeks 1→4
+    if range_type == "day":
+        sorted_keys = sorted(stats.keys(), key=lambda x: int(x.split(":")[0]))
+    elif range_type == "week":
+        day_order = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        sorted_keys = sorted(stats.keys(), key=lambda d: day_order.index(d) if d in day_order else 7)
+    else:
+        sorted_keys = sorted(stats.keys(), key=lambda w: int(w.split(" ")[-1]))
+
+    result = [{"date": k, "count": stats[k]} for k in sorted_keys]
+    return jsonify(result), 200

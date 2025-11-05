@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import OrderProducts from "./pages/OrderProducts";
 import IncomingOrders from "./pages/IncomingOrders";
 import OrdersList from "./pages/OrdersList";
+import Sales from "./pages/Sales";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +37,7 @@ const App = () => (
             <Route path="/auth/register" element={<RegisterPage />} />
             <Route path="/verify" element={<VerifyRedirect />} />
             <Route path="/verify/:productId" element={<PublicVerify />} />
-            
+
             {/* Protected Routes */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
@@ -74,6 +75,14 @@ const App = () => (
               </ProtectedRoute>
             } />
 
+            <Route path="/sales" element={
+              <ProtectedRoute allowedRoles={['retailer']}>
+                <DashboardLayout>
+                  <Sales />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+
             <Route path="/product/:productId" element={
               <ProtectedRoute>
                 <ProductDetailPage />
@@ -104,10 +113,10 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            
+
             {/* Redirect root to dashboard */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            
+
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>

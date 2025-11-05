@@ -174,7 +174,8 @@ export const productService = {
       responseType: 'blob'
     });
     return response.data;
-  }
+  },
+
 };
 
 // Blockchain Services
@@ -290,8 +291,12 @@ export const orderService = {
     const { data } = await api.get('/api/orders/my_orders', { params });
     return data;
   },
+
+  async getSalesStats(range?: 'day' | 'week' | 'month'): Promise<{ date: string; count: number }[]> {
+    const { data } = await api.get('/api/products/sales_stats', { params: { range } });
+    return data;
+  }
+  
 };
-
-
 
 export default api;
