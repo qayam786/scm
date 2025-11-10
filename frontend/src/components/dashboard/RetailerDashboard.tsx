@@ -88,14 +88,6 @@ export const RetailerDashboard: React.FC = () => {
       gradient: 'bg-gradient-retailer',
       color: 'text-retailer'
     },
-    {
-      title: 'View Analytics',
-      description: 'Sales performance metrics',
-      icon: BarChart3,
-      href: '/analytics',
-      gradient: 'bg-gradient-primary',
-      color: 'text-primary'
-    }
   ];
 
   return (

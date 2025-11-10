@@ -154,10 +154,10 @@ export const ProductDetailPage: React.FC = () => {
               <QrCode className="h-4 w-4 mr-2" />
               QR Code
             </Button>
-            <Button variant="outline" size="sm" onClick={handleExportHistory}>
+            {/* <Button variant="outline" size="sm" onClick={handleExportHistory}>
               <Download className="h-4 w-4 mr-2" />
               Export
-            </Button>
+            </Button> */}
           </div>
         </div>
 

@@ -28,12 +28,12 @@ export const RegisterPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       // Handle password mismatch
       return;
     }
-    
+
     if (!role) {
       // Handle no role selected
       return;
@@ -55,12 +55,12 @@ export const RegisterPage: React.FC = () => {
             key={i}
             className="absolute w-12 h-12 border border-success/20 backdrop-blur-sm bg-success/5 rounded-lg"
             initial={{ opacity: 0, scale: 0 }}
-            animate={{ 
+            animate={{
               opacity: [0.2, 0.5, 0.2],
               scale: [0.5, 1, 0.5],
               rotate: [0, 90, 180, 270, 360]
             }}
-            transition={{ 
+            transition={{
               duration: 10,
               delay: i * 0.8,
               repeat: Infinity,
@@ -74,7 +74,7 @@ export const RegisterPage: React.FC = () => {
         ))}
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -82,14 +82,14 @@ export const RegisterPage: React.FC = () => {
       >
         <Card className="glass-strong border-success/20 shadow-elegant">
           <CardHeader className="text-center space-y-4">
-            <motion.div 
+            <motion.div
               className="mx-auto w-20 h-20 bg-gradient-success rounded-2xl flex items-center justify-center shadow-success"
               whileHover={{ scale: 1.05, rotate: 5 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
               <UserPlus className="w-10 h-10 text-white" />
             </motion.div>
-            
+
             <div className="space-y-2">
               <CardTitle className="text-3xl font-bold text-foreground">
                 Join Our Network
@@ -103,7 +103,7 @@ export const RegisterPage: React.FC = () => {
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Username Field */}
-              <motion.div 
+              <motion.div
                 className="space-y-2"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -128,7 +128,7 @@ export const RegisterPage: React.FC = () => {
               </motion.div>
 
               {/* Role Selection */}
-              <motion.div 
+              <motion.div
                 className="space-y-2"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -137,34 +137,36 @@ export const RegisterPage: React.FC = () => {
                 <Label htmlFor="role" className="text-foreground font-medium">
                   Select Your Role
                 </Label>
-                <Select 
-                  value={role} 
-                  onValueChange={(value: string) => setRole(value as UserRole)} 
+                <Select
+                  value={role}
+                  onValueChange={(value: string) => setRole(value as UserRole)}
                   disabled={isLoading}
                 >
                   <SelectTrigger className="glass border-success/20 focus:border-success/40">
                     <SelectValue placeholder="Choose your role in the supply chain" />
                   </SelectTrigger>
                   <SelectContent className="glass-strong">
-                    {Object.entries(ROLE_CONFIG).map(([roleKey, config]) => {
-                      const Icon = roleIcons[roleKey as UserRole];
-                      return (
-                        <SelectItem key={roleKey} value={roleKey} className="hover:bg-white/5">
-                          <div className="flex items-center space-x-3">
-                            <div className={`w-8 h-8 ${config.gradient} rounded-lg flex items-center justify-center`}>
-                              <Icon className="w-4 h-4 text-white" />
+                    {Object.entries(ROLE_CONFIG)
+                      .filter(([roleKey]) => roleKey !== 'super_admin')
+                      .map(([roleKey, config]) => {
+                        const Icon = roleIcons[roleKey as UserRole];
+                        return (
+                          <SelectItem key={roleKey} value={roleKey} className="hover:bg-white/5">
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-8 h-8 ${config.gradient} rounded-lg flex items-center justify-center`}>
+                                <Icon className="w-4 h-4 text-white" />
+                              </div>
+                              <span>{config.label}</span>
                             </div>
-                            <span>{config.label}</span>
-                          </div>
-                        </SelectItem>
-                      );
-                    })}
+                          </SelectItem>
+                        );
+                      })}
                   </SelectContent>
                 </Select>
               </motion.div>
 
               {/* Password Field */}
-              <motion.div 
+              <motion.div
                 className="space-y-2"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -189,7 +191,7 @@ export const RegisterPage: React.FC = () => {
               </motion.div>
 
               {/* Confirm Password Field */}
-              <motion.div 
+              <motion.div
                 className="space-y-2"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -244,7 +246,7 @@ export const RegisterPage: React.FC = () => {
             </form>
 
             {/* Login Link */}
-            <motion.div 
+            <motion.div
               className="text-center pt-4 border-t border-success/10"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -252,8 +254,8 @@ export const RegisterPage: React.FC = () => {
             >
               <p className="text-muted-foreground">
                 Already have an account?{' '}
-                <Link 
-                  to="/auth/login" 
+                <Link
+                  to="/auth/login"
                   className="text-success hover:text-success-glow font-medium hover:underline transition-colors"
                 >
                   Sign In
@@ -264,7 +266,7 @@ export const RegisterPage: React.FC = () => {
         </Card>
 
         {/*  Security Features */}
-        <motion.div 
+        <motion.div
           className="mt-8 text-center space-y-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

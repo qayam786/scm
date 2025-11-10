@@ -1,9 +1,6 @@
-// 🎯 BLOCKCHAIN SUPPLY CHAIN CONSTANTS
-// Central configuration for our supply chain system
-
 import { ProductStatus, UserRole, StatusConfig, RoleConfig } from '@/types';
 
-// 📦 Product Status Configuration
+//Product Status Configuration
 export const STATUS_ORDER: ProductStatus[] = [
   'Created',
   'ReadyForShipping', 
@@ -15,7 +12,7 @@ export const STATUS_ORDER: ProductStatus[] = [
   'Recalled'
 ];
 
-// 🎨 Status Styling Configuration
+// Status Styling Configuration
 export const STATUS_CONFIG: Record<ProductStatus, StatusConfig> = {
   Created: {
     label: 'Created',
@@ -67,7 +64,7 @@ export const STATUS_CONFIG: Record<ProductStatus, StatusConfig> = {
   }
 };
 
-// 🎭 Role Configuration
+//  Role Configuration
 export const ROLE_CONFIG: Record<UserRole, RoleConfig> = {
   manufacturer: {
     label: 'Manufacturer',
@@ -103,13 +100,13 @@ export const ROLE_ALLOWED_STATUS: Record<UserRole, ProductStatus[]> = {
   super_admin: STATUS_ORDER
 };
 
-// 🔄 Status Transition Rules
+//  Status Transition Rules
 export const NEXT_ROLE_MAP: Record<string, UserRole> = {
   ReadyForShipping: 'distributor',
   DeliveredToRetailer: 'retailer'
 };
 
-// 🛡️ Role Permissions
+// Role Permissions
 export const PERMISSIONS = {
   CREATE_PRODUCT: ['manufacturer'],
   UPDATE_PRODUCT: ['manufacturer', 'distributor', 'retailer'],
@@ -119,20 +116,20 @@ export const PERMISSIONS = {
   EXPORT_DATA: ['super_admin']
 } as const;
 
-// 🌍 Default Coordinates (for fallback)
+// Default Coordinates (for fallback)
 export const DEFAULT_LOCATION = {
   latitude: 40.7128,
   longitude: -74.0060 // New York City
 };
 
-// ⏱️ Timeouts and Intervals
+// Timeouts and Intervals
 export const TIMEOUTS = {
   API_REQUEST: 30000, // 30 seconds
   GEOLOCATION: 10000, // 10 seconds
   TOAST_DURATION: 5000 // 5 seconds
 } as const;
 
-// 🎨 Animation Durations
+// Animation Durations
 export const ANIMATIONS = {
   FAST: 200,
   NORMAL: 300,

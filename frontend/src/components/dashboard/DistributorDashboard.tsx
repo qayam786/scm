@@ -83,15 +83,15 @@ export const DistributorDashboard: React.FC = () => {
       title: 'Update Shipment',
       description: 'Update product shipping status',
       icon: Navigation,
-      href: '/products/update',
+      href: '/products',
       gradient: 'bg-gradient-distributor',
       color: 'text-distributor'
     },
     {
-      title: 'Track Shipments',
-      description: 'Monitor all active shipments',
+      title: 'Manage Orders',
+      description: 'Track your product orders and requests',
       icon: MapPin,
-      href: '/tracking',
+      href: '/orders',
       gradient: 'bg-gradient-primary',
       color: 'text-primary'
     }
