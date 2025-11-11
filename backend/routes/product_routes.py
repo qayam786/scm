@@ -108,7 +108,7 @@ def create_product():
         "message": "Product created successfully", "product": product.to_dict(),
         "block": block.to_dict(), "qr_code_base64": qr_b64,
         "qr_url": f"{backend_base}/api/products/{pid}/qrcode", "history_url": f"{backend_base}/api/products/{pid}/history",
-        "public_verify_url": f"{base_url}/verify/{pid}?api_base_url={backend_base}"
+        "public_verify_url": f"{frontend_base}/verify/{pid}?api_base_url={backend_base}"
     }), 201
 
 @bp.route("/update", methods=["POST"])
@@ -319,7 +319,7 @@ def get_product_qrcode(product_id):
 
     # generate PNG QR image
     img = qrcode.make(qr_data)
-    
+
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
