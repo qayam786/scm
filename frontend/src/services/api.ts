@@ -11,22 +11,34 @@ import {
 } from '@/types';
 
 
-const DEFAULT_API_BASE_URL = 'http://127.0.0.1:5000';
+// const DEFAULT_API_BASE_URL = 'http://127.0.0.1:5000';
 
-function resolveApiBaseUrl() {
-  try {
-    const url = new URL(window.location.href);
-    const fromParam = url.searchParams.get('api_base_url');
-    if (fromParam) {
-      localStorage.setItem('api_base_url', fromParam);
-      return fromParam;
-    }
-  } catch {}
-  return localStorage.getItem('api_base_url') || DEFAULT_API_BASE_URL;
-}
+// function resolveApiBaseUrl() {
+//   try {
+//     const url = new URL(window.location.href);
+//     const fromParam = url.searchParams.get('api_base_url');
+//     if (fromParam) {
+//       localStorage.setItem('api_base_url', fromParam);
+//       return fromParam;
+//     }
+//   } catch {}
+//   return localStorage.getItem('api_base_url') || DEFAULT_API_BASE_URL;
+// }
+
+// const api = axios.create({
+//   baseURL: resolveApiBaseUrl(),
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
+
+// Use Vite's environment variable system.
+// import.meta.env.VITE_API_URL will be set by Netlify in production.
+// We fall back to localhost:5000 for local development.
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 
 const api = axios.create({
-  baseURL: resolveApiBaseUrl(),
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -239,7 +251,8 @@ export const locationService = {
 export const publicVerifyService = {
   async verifyProduct(productId: string): Promise<ProductHistory> {
     const publicApi = axios.create({
-      baseURL: resolveApiBaseUrl(),
+      // baseURL: resolveApiBaseUrl(),
+      baseURL: API_BASE_URL, // Use the same base URL as the main 'api' instance
       headers: {
         'Content-Type': 'application/json',
       },

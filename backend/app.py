@@ -1,10 +1,9 @@
-from flask import Flask
+from flask import Flask, redirect, current_app  #Added current_app
 from flask_cors import CORS
 from config import SECRET_KEY, JWT_SECRET_KEY, DATABASE_URL, FRONTEND_PUBLIC_BASE_URL, BACKEND_PUBLIC_BASE_URL
 from db import db
 from flask_jwt_extended import JWTManager
 from blockchain import Blockchain
-from flask import redirect
 import os
 
 def create_app():
@@ -46,12 +45,24 @@ def create_app():
         return {"message": "SCM Blockchain Backend running"}
     
 
+    # @app.route("/verify/<product_id>")
+    # def redirect_to_frontend(product_id):
+    #     LOCAL_IP = "10.122.180.147"  
+    #     FRONTEND_PORT = 5173          
+    # # When QR code is scanned, Flask will redirect to frontend verify page
+    #     frontend_url = f"http://{LOCAL_IP}:{FRONTEND_PORT}/verify/{product_id}"
+    #     return redirect(frontend_url)
+
     @app.route("/verify/<product_id>")
     def redirect_to_frontend(product_id):
-        LOCAL_IP = "10.122.180.147"  
-        FRONTEND_PORT = 5173          
-    # When QR code is scanned, Flask will redirect to frontend verify page
-        frontend_url = f"http://{LOCAL_IP}:{FRONTEND_PORT}/verify/{product_id}"
+        # Use the configured frontend URL, which we will set in Render
+        frontend_base_url = current_app.config.get("FRONTEND_PUBLIC_BASE_URL")
+        
+        if not frontend_base_url:
+            # A fallback in case the environment variable is not set
+            return {"error": "Frontend URL not configured"}, 500
+
+        frontend_url = f"{frontend_base_url}/verify/{product_id}"
         return redirect(frontend_url)
 
     return app
