@@ -10,7 +10,7 @@ import base64
 import csv
 from sqlalchemy import desc, asc, or_, and_
 from flask import current_app
-LOCAL_IP = "10.122.180.147"       # your IPv4 from ipconfig
+# LOCAL_IP = "10.122.180.147"       # your IPv4 from ipconfig
 
 
 bp = Blueprint("products", __name__, url_prefix="/api/products")
@@ -69,21 +69,36 @@ def create_product():
         "location": f"{lat},{lon}" if lat is not None else "N/A"
     })
 
-    # Build absolute QR target to frontend public verify page
-    base_url = current_app.config.get("FRONTEND_PUBLIC_BASE_URL")
-    if not base_url:
-      # derive from request host if not set (works on LAN too)
-      scheme = request.headers.get('X-Forwarded-Proto', request.scheme)
-      host = request.headers.get('X-Forwarded-Host', request.host)
-      base_url = f"{scheme}://{host}"
-    # Pass backend base to frontend via query param to ensure phone uses correct API host
-    backend_base = current_app.config.get("BACKEND_PUBLIC_BASE_URL") or base_url
-    import socket
-    #generate full local URL for QR code
-    FRONTEND_PORT = 5173              # Vite’s default React port
-    API_BASE = f"http://{LOCAL_IP}:5000"
-    qr_data = f"http://{LOCAL_IP}:{FRONTEND_PORT}/verify/{pid}?api_base_url={API_BASE}"
+    # # Build absolute QR target to frontend public verify page
+    # base_url = current_app.config.get("FRONTEND_PUBLIC_BASE_URL")
+    # if not base_url:
+    #   # derive from request host if not set (works on LAN too)
+    #   scheme = request.headers.get('X-Forwarded-Proto', request.scheme)
+    #   host = request.headers.get('X-Forwarded-Host', request.host)
+    #   base_url = f"{scheme}://{host}"
+    # # Pass backend base to frontend via query param to ensure phone uses correct API host
+    # backend_base = current_app.config.get("BACKEND_PUBLIC_BASE_URL") or base_url
+    # import socket
+    # #generate full local URL for QR code
+    # FRONTEND_PORT = 5173              # Vite’s default React port
+    # API_BASE = f"http://{LOCAL_IP}:5000"
+    # qr_data = f"http://{LOCAL_IP}:{FRONTEND_PORT}/verify/{pid}?api_base_url={API_BASE}"
+    # img = qrcode.make(qr_data)
+
+    # Get production URLs from environment variables
+    frontend_base = current_app.config.get("FRONTEND_PUBLIC_BASE_URL")
+    backend_base = current_app.config.get("BACKEND_PUBLIC_BASE_URL")
+
+    if not frontend_base or not backend_base:
+        # Fallback for missing env vars, though this shouldn't happen in production
+        return jsonify({"error": "Server configuration error: URLs not set"}), 500
+
+    # The QR code MUST point to the BACKEND /verify endpoint.
+    # The backend will then redirect to the frontend.
+    qr_data = f"{backend_base}/verify/{pid}"
+    
     img = qrcode.make(qr_data)
+
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     qr_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
@@ -278,16 +293,33 @@ def verify_blockchain():
 @bp.route("/<product_id>/qrcode", methods=["GET"])
 @jwt_required(optional=True)
 def get_product_qrcode(product_id):
+    # product = Product.query.filter_by(product_id=product_id).first()
+    # if not product:
+    #     return jsonify({"error": "product not found"}), 404
+    # FRONTEND_PORT = 5173
+    # BACKEND_PORT = 5000
+    # base_url = f"http://{LOCAL_IP}:{FRONTEND_PORT}"
+    # backend_base = f"http://{LOCAL_IP}:{BACKEND_PORT}"
+    # qr_data = f"{base_url}/verify/{product_id}?api_base_url={backend_base}"
+    # # generate PNG QR image
+    # img = qrcode.make(qr_data)
+
     product = Product.query.filter_by(product_id=product_id).first()
     if not product:
         return jsonify({"error": "product not found"}), 404
-    FRONTEND_PORT = 5173
-    BACKEND_PORT = 5000
-    base_url = f"http://{LOCAL_IP}:{FRONTEND_PORT}"
-    backend_base = f"http://{LOCAL_IP}:{BACKEND_PORT}"
-    qr_data = f"{base_url}/verify/{product_id}?api_base_url={backend_base}"
+
+    # Get production URL from environment variables
+    backend_base = current_app.config.get("BACKEND_PUBLIC_BASE_URL")
+    
+    if not backend_base:
+        return jsonify({"error": "Server configuration error: Backend URL not set"}), 500
+
+    # The QR code MUST point to the BACKEND /verify endpoint.
+    qr_data = f"{backend_base}/verify/{product_id}"
+
     # generate PNG QR image
     img = qrcode.make(qr_data)
+    
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
